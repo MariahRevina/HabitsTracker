@@ -89,6 +89,10 @@ final class TrackersViewController: UIViewController {
     private var visibleCategories: [TrackerCategory] = []
     private var completedTrackers: Set<TrackerRecord> = []
     private let calendar = Calendar.current
+    var currentDate: Date {
+        return datePicker.date
+    }
+    
     
     // MARK: - Lifecycle
     
@@ -171,20 +175,23 @@ final class TrackersViewController: UIViewController {
         let selectedDate = datePicker.date
         let filterWeekday = calendar.component(.weekday, from: selectedDate)
         
-        visibleCategories = categories.map { category in
-            TrackerCategory(
-                title: category.title,
-                trackers: category.trackers.filter { tracker in
-                    tracker.shedule.contains { weekday in
-                        weekday.numberValue == filterWeekday
-                    }
-                }
-            )
-        }.filter { !$0.trackers.isEmpty }
+        print("🔍 Фильтрация по дню недели: \(filterWeekday)")
+           print("📊 Всего категорий: \(categories.count)")
         
+        visibleCategories = categories.map { category in
+            let filteredTrackers = category.trackers.filter { tracker in
+                tracker.shedule.contains { weekday in
+                    weekday.numberValue == filterWeekday
+                }
+                        }
+            print("📁 Категория '\(category.title)': \(category.trackers.count) трекеров -> \(filteredTrackers.count) после фильтрации")
+                    return TrackerCategory(title: category.title, trackers: filteredTrackers)
+                }.filter { !$0.trackers.isEmpty }
+                
+                print("👀 Видимых категорий: \(visibleCategories.count)")
         collectionView.reloadData()
-        updatePlaceholderVisibility()
-    }
+            updatePlaceholderVisibility()
+        }
     
     private func updateCompleteButtonsState() {
         for case let cell as TrackerCell in collectionView.visibleCells {
@@ -362,16 +369,19 @@ extension TrackersViewController: UISearchBarDelegate {
 }
 extension TrackersViewController: CreateTrackerViewControllerDelegate {
     func didCreateTracker(_ tracker: Tracker, categoryTitle: String) {
-        // Добавляем трекер в соответствующую категорию
-        if let index = categories.firstIndex(where: { $0.title == categoryTitle }) {
-            categories[index].trackers.append(tracker)
+        var newCategories = categories
+        if let index = newCategories.firstIndex(where: { $0.title == categoryTitle }) {
+            var updatedTrackers = newCategories[index].trackers
+            updatedTrackers.append(tracker)
+            newCategories[index] = TrackerCategory(title: categoryTitle, trackers: updatedTrackers)
         } else {
-            // Или создаем новую категорию
+            
             let newCategory = TrackerCategory(title: categoryTitle, trackers: [tracker])
-            categories.append(newCategory)
+            newCategories.append(newCategory)
         }
-        
+        categories = newCategories
         reloadData()
+        
         dismiss(animated: true)
     }
 }

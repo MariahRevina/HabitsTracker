@@ -1,23 +1,13 @@
 import UIKit
 
 class SheduleScreen: UIViewController {
-
+    
     // MARK: - Properties
     
     weak var delegate: ScheduleSelectionDelegate?
     var selectedDays: [Weekday] = []
     
     // MARK: - UI Elements
-    
-    private let nameScreen: UILabel = {
-        let label = UILabel()
-        label.text = "Расписание"
-        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        label.textColor = .yBlackDay
-        label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    } ()
     
     private let weekdayTableView: UITableView = {
         let tableView = UITableView()
@@ -29,32 +19,72 @@ class SheduleScreen: UIViewController {
         return tableView
     }()
     
+    private lazy var readyButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Готово", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.backgroundColor = .yBlackDay
+        button.layer.cornerRadius = 16
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        button.addAction(UIAction { [weak self] _ in
+            self?.readyButtonTapped()
+        }, for: .touchUpInside)
+        return button
+    } ()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-       
+        setupNavigationBar()
     }
     
     // MARK: - Setup
     
     private func setupUI() {
         
-        view.addSubview(nameScreen)
+        view.backgroundColor = .white
+        
         view.addSubview(weekdayTableView)
+        view.addSubview(readyButton)
         
         weekdayTableView.delegate = self
         weekdayTableView.dataSource = self
-        
+        setupConstraints()
         
     }
     
     private func setupConstraints() {
         
         NSLayoutConstraint.activate([
-            nameScreen.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            nameScreen.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            nameScreen.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            
+            
+            weekdayTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
+            weekdayTableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            weekdayTableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            weekdayTableView.heightAnchor.constraint(equalToConstant: 525),
+            
+            readyButton.heightAnchor.constraint(equalToConstant: 60),
+            readyButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            readyButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            readyButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+            
         ])
+    }
+    
+    private func setupNavigationBar() {
+            title = "Расписание"
+            navigationController?.navigationBar.titleTextAttributes = [
+                NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16, weight: .medium)
+            ]
+        }
+    
+    // MARK: - Actions
+    
+    private func readyButtonTapped() {
+        delegate?.didSelectSchedule(selectedDays)
+        dismiss(animated: true)
     }
 }
 
@@ -62,9 +92,10 @@ class SheduleScreen: UIViewController {
 
 extension SheduleScreen: UITableViewDelegate {
     
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 75
+    }
 }
-
-
 
 extension SheduleScreen: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -72,8 +103,27 @@ extension SheduleScreen: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        <#code#>
+        let cell = tableView.dequeueReusableCell(withIdentifier: "weekdayCell", for: indexPath)
+        let weekday = Weekday.allCases[indexPath.row]
+        cell.textLabel?.text = weekday.name
+        cell.textLabel?.textAlignment = .center
+        cell.backgroundColor = .clear
+        
+        let switchView = UISwitch()
+        switchView.isOn = selectedDays.contains(weekday)
+        
+        switchView.addAction(UIAction { [weak self] _ in
+            if switchView.isOn {
+                if !(self?.selectedDays.contains(weekday) ?? false) {
+                    self?.selectedDays.append(weekday)
+                }
+            } else {
+                self?.selectedDays.removeAll { $0 == weekday }
+            }
+        }, for: .valueChanged)
+        
+        
+        cell.accessoryView = switchView
+        return cell
     }
-    
-    
 }

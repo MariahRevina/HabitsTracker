@@ -110,6 +110,8 @@ final class CreateHabitScreen: UIViewController {
         
         view.backgroundColor = .white
         
+        textField.delegate = self
+        
         view.addSubview(nameScreen)
         view.addSubview(textField)
         view.addSubview(optionsTableView)
@@ -130,7 +132,7 @@ final class CreateHabitScreen: UIViewController {
         }, for: .touchUpInside)
         
         setupConstraints()
-        textField.delegate = self
+        
     }
     
     private func setupConstraints() {
@@ -180,6 +182,7 @@ final class CreateHabitScreen: UIViewController {
             print("Не все поля заполнены")
             return
         }
+        
         let newTracker = Tracker(
             id: UUID(),
             name: name,
@@ -252,12 +255,14 @@ extension CreateHabitScreen: UITableViewDelegate {
         case 0:
             let categoryVC = CategoryScreen()
             categoryVC.delegate = self
-            present(categoryVC, animated: true)
+            let navController = UINavigationController(rootViewController: categoryVC)
+            present(navController, animated: true)
         case 1:
             let scheduleVC = SheduleScreen()
             scheduleVC.delegate = self
             scheduleVC.selectedDays = selectedSchedule
-            present(scheduleVC, animated: true)
+            let navController = UINavigationController(rootViewController: scheduleVC)
+            present(navController, animated: true)
         default:
             break
         }

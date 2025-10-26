@@ -18,7 +18,7 @@ enum Weekday: Int, CaseIterable {
     case sunday = 7
     
     var numberValue: Int {
-        return rawValue
+        return self.rawValue
     }
     var name: String {
         switch self {
