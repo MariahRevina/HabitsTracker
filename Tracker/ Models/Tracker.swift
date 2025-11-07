@@ -8,7 +8,7 @@ struct Tracker {
     let emoji: String
     let isPinned: Bool = false
 }
-enum Weekday: Int, CaseIterable {
+enum Weekday: Int, CaseIterable, Codable {
     case monday = 1
     case tuesday = 2
     case wednesday = 3
