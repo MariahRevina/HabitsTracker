@@ -30,11 +30,11 @@ final class ColorCell: UICollectionViewCell {
         contentView.addSubview(colorView)
         
         
-    NSLayoutConstraint.activate([
-        colorView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-        colorView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-        colorView.widthAnchor.constraint(equalToConstant: 40),
-        colorView.heightAnchor.constraint(equalToConstant: 40)
+        NSLayoutConstraint.activate([
+            colorView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            colorView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            colorView.widthAnchor.constraint(equalToConstant: 40),
+            colorView.heightAnchor.constraint(equalToConstant: 40)
         ])
     }
     func configure(with color: UIColor) {

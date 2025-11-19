@@ -15,7 +15,7 @@ final class TrackerRecordStore {
             let normalizedDate = calendar.startOfDay(for: date)
             record.date = normalizedDate
         
-            try context.save()
+            DataBaseStore.shared.saveContext()
     }
     
     func removeRecord(for trackerId: UUID, date: Date) throws {
@@ -34,7 +34,7 @@ final class TrackerRecordStore {
         let results = try context.fetch(fetchRequest)
         if let recordToDelete = results.first {
             context.delete(recordToDelete)
-            try context.save()
+            DataBaseStore.shared.saveContext()
         }
     }
     

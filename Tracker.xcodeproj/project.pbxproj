@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		27A2E5182ECDCB7C0050633F /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 27A2E5172ECDCB7C0050633F /* Logging */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		2781455B2E98F64F001B7ABD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -58,6 +62,11 @@
 			path = TrackerUITests;
 			sourceTree = "<group>";
 		};
+		27A2E5192ECDCCD30050633F /* Services */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Services;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +74,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27A2E5182ECDCB7C0050633F /* Logging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,6 +98,7 @@
 		278145382E98F64D001B7ABD = {
 			isa = PBXGroup;
 			children = (
+				27A2E5192ECDCCD30050633F /* Services */,
 				278145432E98F64D001B7ABD /* Tracker */,
 				2781455D2E98F64F001B7ABD /* TrackerTests */,
 				278145672E98F64F001B7ABD /* TrackerUITests */,
@@ -122,9 +133,11 @@
 			);
 			fileSystemSynchronizedGroups = (
 				278145432E98F64D001B7ABD /* Tracker */,
+				27A2E5192ECDCCD30050633F /* Services */,
 			);
 			name = Tracker;
 			packageProductDependencies = (
+				27A2E5172ECDCB7C0050633F /* Logging */,
 			);
 			productName = Tracker;
 			productReference = 278145412E98F64D001B7ABD /* Tracker.app */;
@@ -208,6 +221,9 @@
 			);
 			mainGroup = 278145382E98F64D001B7ABD;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				27A2E5162ECDCB7C0050633F /* XCRemoteSwiftPackageReference "swift-log" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 278145422E98F64D001B7ABD /* Products */;
 			projectDirPath = "";
@@ -579,6 +595,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		27A2E5162ECDCB7C0050633F /* XCRemoteSwiftPackageReference "swift-log" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-log";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.6.4;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		27A2E5172ECDCB7C0050633F /* Logging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 27A2E5162ECDCB7C0050633F /* XCRemoteSwiftPackageReference "swift-log" */;
+			productName = Logging;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 278145392E98F64D001B7ABD /* Project object */;
 }

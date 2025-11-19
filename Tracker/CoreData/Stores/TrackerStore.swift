@@ -60,12 +60,7 @@ final class TrackerStore: NSObject {
         let category = try trackerCategoryStore.fetchOrCreateCategory(with: categoryTitle)
         trackerCoreData.category = category
         
-        do {
-            try context.save()
-        } catch {
-            context.rollback()
-            throw error
-        }
+        DataBaseStore.shared.saveContext()
     }
     
     
@@ -142,7 +137,7 @@ final class TrackerStore: NSObject {
         let results = try context.fetch(fetchRequest)
         if let trackerToDelete = results.first {
             context.delete(trackerToDelete)
-            try context.save()
+            DataBaseStore.shared.saveContext()
         }
     }
 }
