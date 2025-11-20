@@ -232,7 +232,7 @@ final class TrackersViewController: UIViewController {
                 collectionView.reloadItems(at: [indexPath])
             }
         } catch {
-            print("Failed to complete tracker: \(error)")
+            LoggerService.shared.error("Failed to complete tracker: \(error)")
         }
     }
     
@@ -251,7 +251,7 @@ final class TrackersViewController: UIViewController {
                 collectionView.reloadItems(at: [indexPath])
             }
         } catch {
-            print("Failed to uncomplete tracker: \(error)")
+            LoggerService.shared.error("Failed to uncomplete tracker: \(error)")
         }
     }
     

@@ -235,7 +235,16 @@ final class CreateHabitScreen: UIViewController {
               let emoji = selectedEmoji,
               let color = selectedColor
         else {
-            print("Не все поля заполнены")
+            LoggerService.shared.error(
+                """
+                Попытка создания трекера с незаполненными полями:
+                - имя: \(textField.text ?? "nil")
+                - категория: \(selectedCategory ?? "nil") 
+                - расписание: \(selectedSchedule.count) дней
+                - эмодзи: \(selectedEmoji ?? "nil")
+                - цвет: \(selectedColor != nil ? "выбран" : "не выбран")
+                """
+            )
             return
         }
         

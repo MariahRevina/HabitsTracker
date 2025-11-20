@@ -30,7 +30,7 @@ final class TrackerStore: NSObject {
         do {
             try controller.performFetch()
         } catch {
-            print("❌ Failed to fetch trackers: \(error)")
+            LoggerService.shared.error("❌ Failed to fetch trackers: \(error)")
         }
         
         return controller
@@ -119,9 +119,7 @@ final class TrackerStore: NSObject {
                     categories[categoryTitle] = []
                 }
                 categories[categoryTitle]?.append(tracker)
-            } else {
-                print("❌ Трекер '\(tracker.name)' не подходит для дня \(targetWeekday.rawValue)")
-            }
+            } 
         }
         
         let result = categories.map { TrackerCategory(title: $0.key, trackers: $0.value) }

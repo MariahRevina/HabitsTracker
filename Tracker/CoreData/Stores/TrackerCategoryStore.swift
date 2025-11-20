@@ -31,7 +31,7 @@ final class TrackerCategoryStore {
             let results = try context.fetch(fetchRequest)
             return results.first?.category?.title
         } catch {
-            print("Failed to fetch category title: \(error)")
+            LoggerService.shared.error("Failed to fetch category title: \(error)")
             return nil
         }
     }

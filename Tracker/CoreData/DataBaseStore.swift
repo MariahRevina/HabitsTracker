@@ -11,8 +11,6 @@ final class DataBaseStore {
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
                 assertionFailure("Unresolved error \(error), \(error.userInfo)")
-            } else {
-                print("✅ Core Data store loaded successfully")
             }
         })
         return container

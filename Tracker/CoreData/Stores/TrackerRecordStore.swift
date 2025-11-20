@@ -55,7 +55,7 @@ final class TrackerRecordStore {
             
             return records
         } catch {
-            print("Failed to fetch completed trackers: \(error)")
+            LoggerService.shared.error("Failed to fetch completed trackers: \(error)")
             return []
         }
     }
@@ -68,7 +68,7 @@ final class TrackerRecordStore {
             let results = try context.fetch(fetchRequest)
             return results.count
         } catch {
-            print("Failed to fetch completed days count: \(error)")
+            LoggerService.shared.error("Failed to fetch completed days count: \(error)")
             return 0
         }
     }
@@ -90,7 +90,7 @@ final class TrackerRecordStore {
             let results = try context.fetch(fetchRequest)
             return !results.isEmpty
         } catch {
-            print("Failed to check if tracker is completed: \(error)")
+            LoggerService.shared.error("Failed to fetch if tracker is completed: \(error)")
             return false
         }
     }
