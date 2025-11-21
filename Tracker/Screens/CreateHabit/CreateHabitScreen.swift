@@ -7,6 +7,14 @@ final class CreateHabitScreen: UIViewController {
     weak var delegate: CreateTrackerViewControllerDelegate?
     private var selectedCategory: String?
     private var selectedSchedule: [Weekday] = []
+    private var selectedEmoji: String?
+    private var selectedColor: UIColor?
+    private let options = ["Категория", "Расписание"]
+    private enum Constants {
+        static let emojiCellIdentifier = "emojiCell"
+        static let colorCellIdentifier = "colorCell"
+        static let headerIdentifier = "header"
+    }
     
     // MARK: - UI Elements
     
@@ -17,6 +25,12 @@ final class CreateHabitScreen: UIViewController {
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
+    }()
+    
+    private lazy var scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        return scrollView
     }()
     
     private lazy var textField: UITextField = {
@@ -63,6 +77,22 @@ final class CreateHabitScreen: UIViewController {
         return tableView
     }()
     
+    private lazy var collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumInteritemSpacing = 5
+        layout.minimumLineSpacing = 0
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.register(EmojiCell.self, forCellWithReuseIdentifier: Constants.emojiCellIdentifier)
+        collectionView.register(ColorCell.self, forCellWithReuseIdentifier: Constants.colorCellIdentifier)
+        collectionView.register(EmojiAndColorsHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                                withReuseIdentifier: Constants.headerIdentifier)
+        
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.isScrollEnabled = false
+        return collectionView
+    }()
+    
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Отменить", for: .normal)
@@ -94,14 +124,13 @@ final class CreateHabitScreen: UIViewController {
         return button
     }()
     
-    private let options = ["Категория", "Расписание"]
-    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         updateCreateButtonState()
+        collectionView.allowsMultipleSelection = true
     }
     
     // MARK: - Setup
@@ -113,15 +142,21 @@ final class CreateHabitScreen: UIViewController {
         textField.delegate = self
         
         view.addSubview(nameScreen)
-        view.addSubview(textField)
-        view.addSubview(optionsTableView)
-        view.addSubview(cancelButton)
+        view.addSubview(scrollView)
         view.addSubview(createButton)
-        view.addSubview(clearTextButton)
-        view.addSubview(errorLabel)
+        view.addSubview(cancelButton)
+        
+        scrollView.addSubview(textField)
+        scrollView.addSubview(optionsTableView)
+        scrollView.addSubview(collectionView)
+        scrollView.addSubview(clearTextButton)
+        scrollView.addSubview(errorLabel)
         
         optionsTableView.delegate = self
         optionsTableView.dataSource = self
+        
+        collectionView.delegate = self
+        collectionView.dataSource = self
         
         textField.addAction(UIAction { [weak self] _ in
             self?.textFieldChanged()
@@ -143,7 +178,12 @@ final class CreateHabitScreen: UIViewController {
             nameScreen.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             nameScreen.heightAnchor.constraint(equalToConstant: 22),
             
-            textField.topAnchor.constraint(equalTo: nameScreen.bottomAnchor, constant: 38),
+            scrollView.topAnchor.constraint(equalTo: nameScreen.bottomAnchor, constant: 24),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: cancelButton.topAnchor, constant: -16),
+            
+            textField.topAnchor.constraint(equalTo: scrollView.topAnchor),
             textField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             textField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             textField.heightAnchor.constraint(equalToConstant: 75),
@@ -160,6 +200,12 @@ final class CreateHabitScreen: UIViewController {
             optionsTableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             optionsTableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             optionsTableView.heightAnchor.constraint(equalToConstant: 150),
+            
+            collectionView.topAnchor.constraint(equalTo: optionsTableView.bottomAnchor, constant: 32),
+            collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            collectionView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -16),
+            collectionView.heightAnchor.constraint(equalToConstant: 460),
             
             cancelButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             cancelButton.trailingAnchor.constraint(equalTo: view.centerXAnchor, constant: -4),
@@ -178,17 +224,29 @@ final class CreateHabitScreen: UIViewController {
     private func createTracker() {
         guard let name = textField.text, !name.isEmpty,
               let category = selectedCategory,
-              !selectedSchedule.isEmpty else {
-            print("Не все поля заполнены")
+              !selectedSchedule.isEmpty,
+              let emoji = selectedEmoji,
+              let color = selectedColor
+        else {
+            LoggerService.shared.error(
+                """
+                Попытка создания трекера с незаполненными полями:
+                - имя: \(textField.text ?? "nil")
+                - категория: \(selectedCategory ?? "nil") 
+                - расписание: \(selectedSchedule.count) дней
+                - эмодзи: \(selectedEmoji ?? "nil")
+                - цвет: \(selectedColor != nil ? "выбран" : "не выбран")
+                """
+            )
             return
         }
         
         let newTracker = Tracker(
             id: UUID(),
             name: name,
-            color: .systemBlue,
-            shedule: selectedSchedule,
-            emoji: "⭐️"
+            color: color,
+            schedule: selectedSchedule,
+            emoji: emoji
         )
         delegate?.didCreateTracker(newTracker, categoryTitle: category)
         presentingViewController?.dismiss(animated: true)
@@ -233,8 +291,9 @@ final class CreateHabitScreen: UIViewController {
         let isNameEmpty = textField.text?.isEmpty ?? true
         let isCategorySelected = selectedCategory != nil
         let isScheduleSelected = !selectedSchedule.isEmpty
-        
-        let isReadyToCreate = !isNameEmpty && isCategorySelected && isScheduleSelected
+        let isEmojiSelected = selectedEmoji != nil
+        let isColorSelected = selectedColor != nil
+        let isReadyToCreate = !isNameEmpty && isCategorySelected && isScheduleSelected && isEmojiSelected && isColorSelected
         
         createButton.isEnabled = isReadyToCreate
         createButton.backgroundColor = isReadyToCreate ? .black : .gray
@@ -271,7 +330,9 @@ extension CreateHabitScreen: UITableViewDelegate {
         if schedule.count == Weekday.allCases.count {
             return "Каждый день"
         } else {
-            let sortedSchedule = schedule.sorted { $0.rawValue < $1.rawValue }
+            let sortedSchedule = schedule.sorted {
+                $0.bitValue < $1.bitValue
+            }
             return sortedSchedule.map { $0.shortName }.joined(separator: ", ")
         }
     }
@@ -318,8 +379,87 @@ extension CreateHabitScreen: UITableViewDataSource {
     }
 }
 
-// MARK: - Delegate Methods
+// MARK: - UICollectionViewDataSource
 
+extension CreateHabitScreen: UICollectionViewDataSource {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 2
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return section == 0 ? AppData.emojis.count : AppData.colors.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if indexPath.section == 0 {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Constants.emojiCellIdentifier, for: indexPath) as? EmojiCell
+            else {
+                return UICollectionViewCell()
+            }
+            cell.configure(with: AppData.emojis[indexPath.item])
+            return cell
+        } else {
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Constants.colorCellIdentifier, for: indexPath) as? ColorCell else {
+                return UICollectionViewCell()
+            }
+            cell.configure(with: AppData.colors[indexPath.item])
+            return cell
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        guard let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: Constants.headerIdentifier, for: indexPath) as? EmojiAndColorsHeaderView else {return UICollectionReusableView()}
+        
+        if indexPath.section == 0 {
+            header.configure(with: "Emoji")
+        } else {
+            header.configure(with: "Цвет")
+        }
+        return header
+    }
+}
+
+// MARK: - UICollectionViewDelegateFlowLayout
+
+extension CreateHabitScreen: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath:IndexPath) -> CGSize {
+        return CGSize(width: 52, height: 52)
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: UIView.noIntrinsicMetric, height: 18)
+    }
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if indexPath.section == 0{
+            selectedEmoji = AppData.emojis[indexPath.item]
+            deselectAllItems(in: collectionView, forSection: 0, except: indexPath)
+        } else {
+            selectedColor = AppData.colors[indexPath.item]
+            deselectAllItems(in: collectionView, forSection: 1, except: indexPath)
+            
+        }
+        updateCreateButtonState()
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        if section == 0 {
+            return UIEdgeInsets(top: 24, left: 0, bottom: 16, right: 0)
+        } else {
+            return UIEdgeInsets(top: 42, left: 0, bottom: 0, right: 0)
+        }
+    }
+    private func deselectAllItems(in collectionView: UICollectionView, forSection section: Int, except selectedIndexPath: IndexPath) {
+        for item in 0..<collectionView.numberOfItems(inSection: section) {
+            let indexPath = IndexPath(item: item, section: section)
+            if indexPath != selectedIndexPath {
+                collectionView.deselectItem(at: indexPath, animated: false)
+                if let cell = collectionView.cellForItem(at: indexPath) {
+                    cell.isSelected = false
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Delegate Methods
 extension CreateHabitScreen: CategorySelectionDelegate {
     func didSelectCategory(_ category: String) {
         selectedCategory = category
@@ -327,7 +467,6 @@ extension CreateHabitScreen: CategorySelectionDelegate {
         updateCreateButtonState()
     }
 }
-
 extension CreateHabitScreen: ScheduleSelectionDelegate {
     func didSelectSchedule(_ schedule: [Weekday]) {
         selectedSchedule = schedule
@@ -335,14 +474,12 @@ extension CreateHabitScreen: ScheduleSelectionDelegate {
         updateCreateButtonState()
     }
 }
-
 extension CreateHabitScreen: UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
     }
-    
 }
 
 #Preview {

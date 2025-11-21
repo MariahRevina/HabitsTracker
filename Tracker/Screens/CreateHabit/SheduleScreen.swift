@@ -77,11 +77,11 @@ final class SheduleScreen: UIViewController {
     }
     
     private func setupNavigationBar() {
-            title = "Расписание"
-            navigationController?.navigationBar.titleTextAttributes = [
-                NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16, weight: .medium)
-            ]
-        }
+        title = "Расписание"
+        navigationController?.navigationBar.titleTextAttributes = [
+            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16, weight: .medium)
+        ]
+    }
     
     // MARK: - Actions
     
@@ -90,8 +90,6 @@ final class SheduleScreen: UIViewController {
         dismiss(animated: true)
     }
 }
-
-
 
 extension SheduleScreen: UITableViewDelegate {
     
@@ -108,7 +106,7 @@ extension SheduleScreen: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "weekdayCell", for: indexPath)
         let weekday = Weekday.allCases[indexPath.row]
-        cell.textLabel?.text = weekday.name
+        cell.textLabel?.text = weekday.rawValue
         cell.textLabel?.textAlignment = .left
         cell.backgroundColor = .clear
         
