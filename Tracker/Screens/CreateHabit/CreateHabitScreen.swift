@@ -9,14 +9,7 @@ final class CreateHabitScreen: UIViewController {
     private var selectedSchedule: [Weekday] = []
     private var selectedEmoji: String?
     private var selectedColor: UIColor?
-    
     private let options = ["Категория", "Расписание"]
-    
-    private var emojis: [String] = ["🙂", "😻", "🌺", "🐶", "❤️", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🥇", "🎸", "🏝", "😪"]
-    
-    private var colors: [UIColor] = [.cvRed, .cvBeige, .cvBlue, .cvGreen, .cvOrange, .cvPurple, .cvDarkBluePurple, .cvDarkPink, .cvDurtyBlue, .cvDustyRose, .cvLightBlue, .cvDurtyPurple, .cvRedOrange, .cvLightGreen,
-                                     .cvBrightPink, .cvBrightGreen, .cvPinkPurple, .cvBrightPurple]
-    
     private enum Constants {
         static let emojiCellIdentifier = "emojiCell"
         static let colorCellIdentifier = "colorCell"
@@ -394,7 +387,7 @@ extension CreateHabitScreen: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return section == 0 ? emojis.count : colors.count
+        return section == 0 ? AppData.emojis.count : AppData.colors.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -403,13 +396,13 @@ extension CreateHabitScreen: UICollectionViewDataSource {
             else {
                 return UICollectionViewCell()
             }
-            cell.configure(with: emojis[indexPath.item])
+            cell.configure(with: AppData.emojis[indexPath.item])
             return cell
         } else {
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Constants.colorCellIdentifier, for: indexPath) as? ColorCell else {
                 return UICollectionViewCell()
             }
-            cell.configure(with: colors[indexPath.item])
+            cell.configure(with: AppData.colors[indexPath.item])
             return cell
         }
     }
@@ -437,10 +430,10 @@ extension CreateHabitScreen: UICollectionViewDelegateFlowLayout {
     }
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if indexPath.section == 0{
-            selectedEmoji = emojis[indexPath.item]
+            selectedEmoji = AppData.emojis[indexPath.item]
             deselectAllItems(in: collectionView, forSection: 0, except: indexPath)
         } else {
-            selectedColor = colors[indexPath.item]
+            selectedColor = AppData.colors[indexPath.item]
             deselectAllItems(in: collectionView, forSection: 1, except: indexPath)
             
         }
@@ -454,20 +447,19 @@ extension CreateHabitScreen: UICollectionViewDelegateFlowLayout {
         }
     }
     private func deselectAllItems(in collectionView: UICollectionView, forSection section: Int, except selectedIndexPath: IndexPath) {
-            for item in 0..<collectionView.numberOfItems(inSection: section) {
-                let indexPath = IndexPath(item: item, section: section)
-                if indexPath != selectedIndexPath {
-                    collectionView.deselectItem(at: indexPath, animated: false)
-                    if let cell = collectionView.cellForItem(at: indexPath) {
-                        cell.isSelected = false
-                    }
+        for item in 0..<collectionView.numberOfItems(inSection: section) {
+            let indexPath = IndexPath(item: item, section: section)
+            if indexPath != selectedIndexPath {
+                collectionView.deselectItem(at: indexPath, animated: false)
+                if let cell = collectionView.cellForItem(at: indexPath) {
+                    cell.isSelected = false
                 }
             }
         }
+    }
 }
 
 // MARK: - Delegate Methods
-
 extension CreateHabitScreen: CategorySelectionDelegate {
     func didSelectCategory(_ category: String) {
         selectedCategory = category
@@ -475,7 +467,6 @@ extension CreateHabitScreen: CategorySelectionDelegate {
         updateCreateButtonState()
     }
 }
-
 extension CreateHabitScreen: ScheduleSelectionDelegate {
     func didSelectSchedule(_ schedule: [Weekday]) {
         selectedSchedule = schedule
@@ -483,14 +474,12 @@ extension CreateHabitScreen: ScheduleSelectionDelegate {
         updateCreateButtonState()
     }
 }
-
 extension CreateHabitScreen: UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
     }
-    
 }
 
 #Preview {

@@ -9,13 +9,13 @@ enum Weekday: String, CaseIterable, Codable {
     
     var shortName: String {
         switch self {
-        case .monday: return "Пн"
-        case .tuesday: return "Вт"
-        case .wednesday: return "Ср"
-        case .thursday: return "Чт"
-        case .friday: return "Пт"
-        case .saturday: return "Сб"
-        case .sunday: return "Вс"
+        case .monday: "Пн"
+        case .tuesday: "Вт"
+        case .wednesday: "Ср"
+        case .thursday: "Чт"
+        case .friday: "Пт"
+        case .saturday: "Сб"
+        case .sunday: "Вс"
         }
     }
     
@@ -34,13 +34,13 @@ enum Weekday: String, CaseIterable, Codable {
     
     var bitValue: Int {
         switch self {
-        case .monday: return 0
-        case .tuesday: return 1
-        case .wednesday: return 2
-        case .thursday: return 3
-        case .friday: return 4
-        case .saturday: return 5
-        case .sunday: return 6
+        case .monday: 0
+        case .tuesday: 1
+        case .wednesday: 2
+        case .thursday: 3
+        case .friday: 4
+        case .saturday: 5
+        case .sunday: 6
         }
     }
 }
