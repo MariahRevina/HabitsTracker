@@ -312,7 +312,11 @@ extension CreateHabitScreen: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         switch indexPath.row {
         case 0:
-            let categoryVC = CategoryScreen()
+            let categoryStore = TrackerCategoryStore(context: DataBaseStore.shared.viewContext)
+            let categoryVC = CategoryViewController(
+                trackerCategoryStore: categoryStore,
+                selectedCategory: selectedCategory
+            )
             categoryVC.delegate = self
             let navController = UINavigationController(rootViewController: categoryVC)
             present(navController, animated: true)
@@ -392,7 +396,7 @@ extension CreateHabitScreen: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if indexPath.section == 0 {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Constants.emojiCellIdentifier, for: indexPath) as? EmojiCell
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Constants.emojiCellIdentifier, for: indexPath) as? EmojiCell
             else {
                 return UICollectionViewCell()
             }
