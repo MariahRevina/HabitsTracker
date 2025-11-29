@@ -4,7 +4,7 @@ final class AddEditCategoryViewController: UIViewController {
     
     enum Mode {
         case create
-        case edit(String) // содержит старое название категории
+        case edit(String)
     }
     
     // MARK: - Properties

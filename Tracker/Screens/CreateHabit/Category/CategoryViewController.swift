@@ -274,4 +274,17 @@ extension CategoryViewController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         viewModel.selectCategory(at: indexPath.row)
     }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        let numberOfRows = tableView.numberOfRows(inSection: indexPath.section)
+        
+        if indexPath.row == numberOfRows - 1 {
+            cell.layer.cornerRadius = 16
+            cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+            cell.layer.masksToBounds = true
+        } else {
+            cell.layer.cornerRadius = 0
+            cell.layer.masksToBounds = false
+        }
+    }
 }
