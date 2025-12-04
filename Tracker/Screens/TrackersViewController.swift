@@ -14,7 +14,32 @@ final class TrackersViewController: UIViewController {
         return datePicker.date
     }
     
+    // MARK: - UI Colors (Динамические цвета для темной темы)
+    
+    private let backgroundColor: UIColor = {
+            UIColor { traits in
+                traits.userInterfaceStyle == .dark ? .yBlackDay : .white
+            }
+        }()
+    
+    private let textColor: UIColor = {
+            UIColor { traits in
+                traits.userInterfaceStyle == .dark ? .white : .black
+            }
+        }()
+    
     // MARK: - UI Elements
+    private lazy var filterButton: UIButton = {
+            let button = UIButton(type: .system)
+            button.setTitle(NSLocalizedString("filters_button", comment: "Filters button title"), for: .normal)
+            button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+            button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .yBlue
+            button.layer.cornerRadius = 16
+            button.translatesAutoresizingMaskIntoConstraints = false
+            button.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside)
+            return button
+        }()
     
     private lazy var addButton: UIButton = {
         let button = UIButton(type: .system)
@@ -27,7 +52,7 @@ final class TrackersViewController: UIViewController {
     
     private lazy var trackersLabel: UILabel = {
         let label = UILabel()
-        label.text = "Трекеры"
+        label.text = NSLocalizedString("trackers_title", comment: "Main screen title")
         label.font = UIFont.systemFont(ofSize: 34, weight: .bold)
         label.textColor = .black
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -46,12 +71,14 @@ final class TrackersViewController: UIViewController {
             self?.datePickerValueChanged()
         }, for: .valueChanged)
         
+        picker.overrideUserInterfaceStyle = .unspecified
+        
         return picker
     }()
     
     private lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar()
-        searchBar.placeholder = "Поиск"
+        searchBar.placeholder = NSLocalizedString("search_placeholder", comment: "Search placeholder")
         searchBar.searchBarStyle = .minimal
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         
@@ -125,6 +152,7 @@ final class TrackersViewController: UIViewController {
         view.addSubview(searchBar)
         view.addSubview(collectionView)
         view.addSubview(placeholderStack)
+        view.addSubview(filterButton)
         
         setupConstraints()
     }
@@ -164,7 +192,13 @@ final class TrackersViewController: UIViewController {
             placeholderStack.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
             
             placeholderImageView.widthAnchor.constraint(equalToConstant: 80),
-            placeholderImageView.heightAnchor.constraint(equalToConstant: 80)
+            placeholderImageView.heightAnchor.constraint(equalToConstant: 80),
+            
+            // Кнопка фильтров
+                   filterButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                   filterButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+                   filterButton.widthAnchor.constraint(equalToConstant: 114),
+                   filterButton.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
     
@@ -173,6 +207,10 @@ final class TrackersViewController: UIViewController {
         createHabitVC.delegate = self
         present(createHabitVC, animated: true)
     }
+    
+    @objc private func filterButtonTapped() {
+        LoggerService.shared.trace("Filter button tapped")
+        }
     
     private func datePickerValueChanged() {
         reloadData()

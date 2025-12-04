@@ -1,0 +1,14 @@
+/* Tab Bar */
+"trackers_tab" = "Trackers";
+"statistics_tab" = "Statistics";
+
+/* Main Screen */
+"trackers_title" = "Trackers";
+"search_placeholder" = "Search";
+"placeholder_text" = "What will we track?";
+
+/* Filters */
+"filters_button" = "Filters";
+
+/* Days count */
+"days_count" = "%d days";

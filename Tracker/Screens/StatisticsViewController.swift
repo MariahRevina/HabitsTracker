@@ -2,13 +2,23 @@ import UIKit
 
 final class StatisticsViewController: UIViewController {
     
+    private lazy var titleLabel: UILabel = {
+        let label = UILabel()
+        label.text = NSLocalizedString("statistics_tab", comment: "")
+        label.font = UIFont.systemFont(ofSize: 34, weight: .bold)
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .white
         setupUI()
     }
     
     private func setupUI() {
-        view.backgroundColor = .white
+        
         
         let placeholderLabel = UILabel()
         placeholderLabel.text = "Статистика\n(в разработке)"
@@ -19,10 +29,13 @@ final class StatisticsViewController: UIViewController {
         placeholderLabel.translatesAutoresizingMaskIntoConstraints = false
         
         view.addSubview(placeholderLabel)
+        view.addSubview(titleLabel)
         
         NSLayoutConstraint.activate([
             placeholderLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            placeholderLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            placeholderLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            titleLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
 }

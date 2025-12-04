@@ -50,13 +50,13 @@ final class MainTabBarViewController: UITabBarController {
         let statisticsImage = UIImage(resource: .rabbitItem).withRenderingMode(.alwaysTemplate)
         
         trackersVC.tabBarItem = UITabBarItem(
-            title: "Трекеры",
+            title: NSLocalizedString("trackers_tab", comment: "Trackers tab title"),
             image: trackersImage,
             selectedImage: nil
         )
         
         statisticsVC.tabBarItem = UITabBarItem(
-            title: "Статистика",
+            title: NSLocalizedString("statistics_tab", comment: "Statistics tab title"),
             image: statisticsImage,
             selectedImage: nil
         )
