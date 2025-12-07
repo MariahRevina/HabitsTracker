@@ -14,6 +14,9 @@ final class TrackersViewController: UIViewController {
         return datePicker.date
     }
     
+    private var currentFilter: FilterType = .allTrackers
+    private var isFilterApplied: Bool = false
+    
     // MARK: - UI Colors (Динамические цвета для темной темы)
     
     private let backgroundColor: UIColor = {
@@ -139,6 +142,22 @@ final class TrackersViewController: UIViewController {
         loadData()
         reloadData()
         updatePlaceholderVisibility()
+        updateFilterButtonVisibility()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if currentFilter == .todayTrackers {
+            let calendar = Calendar.current
+            let selectedDate = calendar.startOfDay(for: datePicker.date)
+            let today = calendar.startOfDay(for: Date())
+            
+            if selectedDate != today {
+                datePicker.date = Date()
+                reloadData()
+            }
+        }
     }
     
     // MARK: - Private Methods
@@ -211,11 +230,24 @@ final class TrackersViewController: UIViewController {
     
     @objc private func filterButtonTapped() {
         LoggerService.shared.trace("Filter button tapped")
+        
+        let filterVC = FilterViewController(currentFilter: currentFilter, isFilterApplied: isFilterApplied)
+        filterVC.delegate = self
+        filterVC.modalPresentationStyle = .pageSheet
+        
+        if let sheet = filterVC.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+        }
+        
+        present(filterVC, animated: true)
     }
     
     private func datePickerValueChanged() {
+        
         reloadData()
         updateCompleteButtonsState()
+        updateFilterButtonVisibility()
     }
     
     private func loadData() {
@@ -224,11 +256,71 @@ final class TrackersViewController: UIViewController {
     }
     
     private func reloadData() {
-        guard let trackerStore = trackerStore else {return}
+        guard let trackerStore = trackerStore else { return }
         let selectedDate = datePicker.date
-        visibleCategories = trackerStore.fetchTrackers(for: selectedDate)
+        
+        let calendar = Calendar.current
+        let normalizedSelectedDate = calendar.startOfDay(for: selectedDate)
+        let normalizedToday = calendar.startOfDay(for: Date())
+        
+        if currentFilter == .todayTrackers && normalizedSelectedDate != normalizedToday {
+            
+            currentFilter = .allTrackers
+            isFilterApplied = false
+            LoggerService.shared.trace("Date changed manually, resetting filter to .allTrackers")
+        }
+        
+        var allTrackers = trackerStore.fetchTrackers(for: selectedDate)
+        
+        switch currentFilter {
+        case .allTrackers:
+            visibleCategories = allTrackers
+            
+        case .todayTrackers:
+            
+            if normalizedSelectedDate != normalizedToday {
+                datePicker.date = Date()
+            }
+            let today = Date()
+            visibleCategories = trackerStore.fetchTrackers(for: today)
+            
+        case .completed:
+            
+            filterCompletedTrackers(from: &allTrackers)
+            
+        case .notCompleted:
+            
+            filterNotCompletedTrackers(from: &allTrackers)
+        }
+        
+        
+        updateFilterButtonVisibility()
+        
         collectionView.reloadData()
         updatePlaceholderVisibility()
+    }
+    
+    private func filterCompletedTrackers(from categories: inout [TrackerCategory]) {
+        for i in 0..<categories.count {
+            categories[i].trackers = categories[i].trackers.filter { tracker in
+                isTrackerCompletedToday(tracker.id)
+            }
+        }
+        visibleCategories = categories.filter { !$0.trackers.isEmpty }
+    }
+    
+    private func filterNotCompletedTrackers(from categories: inout [TrackerCategory]) {
+        for i in 0..<categories.count {
+            categories[i].trackers = categories[i].trackers.filter { tracker in
+                !isTrackerCompletedToday(tracker.id)
+            }
+        }
+        visibleCategories = categories.filter { !$0.trackers.isEmpty }
+    }
+    
+    private func updateFilterButtonVisibility() {
+        let hasTrackersForSelectedDate = !visibleCategories.isEmpty
+        filterButton.isHidden = !hasTrackersForSelectedDate
     }
     
     private func updateCompleteButtonsState() {
@@ -243,8 +335,21 @@ final class TrackersViewController: UIViewController {
     
     private func updatePlaceholderVisibility() {
         let hasVisibleTrackers = visibleCategories.contains { !$0.trackers.isEmpty }
-        placeholderStack.isHidden = hasVisibleTrackers
-        collectionView.isHidden = !hasVisibleTrackers
+        
+        if hasVisibleTrackers {
+            placeholderStack.isHidden = true
+            collectionView.isHidden = false
+        } else {
+            if currentFilter != .allTrackers && currentFilter != .todayTrackers {
+                placeholderImageView.image = UIImage(resource: .notFound)
+                placeholderLabel.text = "Ничего не найдено"
+            } else {
+                placeholderImageView.image = UIImage(resource: .star)
+                placeholderLabel.text = "Что будем отслеживать?"
+            }
+            placeholderStack.isHidden = false
+            collectionView.isHidden = true
+        }
     }
     
     private func isTrackerCompletedToday(_ trackerId: UUID) -> Bool {
@@ -267,8 +372,12 @@ final class TrackersViewController: UIViewController {
             try trackerRecordStore.addRecord(for: trackerId, date: normalizedSelectedDate)
             completedTrackers = trackerRecordStore.fetchCompletedTrackers()
             
-            if let indexPath = findIndexPathForTracker(with: trackerId) {
-                collectionView.reloadItems(at: [indexPath])
+            if currentFilter == .completed || currentFilter == .notCompleted {
+                reloadData()
+            } else {
+                if let indexPath = findIndexPathForTracker(with: trackerId) {
+                    collectionView.reloadItems(at: [indexPath])
+                }
             }
         } catch {
             LoggerService.shared.error("Failed to complete tracker: \(error)")
@@ -286,8 +395,12 @@ final class TrackersViewController: UIViewController {
             try trackerRecordStore.removeRecord(for: trackerId, date: normalizedSelectedDate)
             completedTrackers = trackerRecordStore.fetchCompletedTrackers()
             
-            if let indexPath = findIndexPathForTracker(with: trackerId) {
-                collectionView.reloadItems(at: [indexPath])
+            if currentFilter == .completed || currentFilter == .notCompleted {
+                reloadData()
+            } else {
+                if let indexPath = findIndexPathForTracker(with: trackerId) {
+                    collectionView.reloadItems(at: [indexPath])
+                }
             }
         } catch {
             LoggerService.shared.error("Failed to uncomplete tracker: \(error)")
@@ -537,6 +650,29 @@ extension TrackersViewController: CreateTrackerViewControllerDelegate {
             )
             alert.addAction(UIAlertAction(title: "OK", style: .default))
             present(alert, animated: true)
+        }
+    }
+}
+extension TrackersViewController: FilterViewControllerDelegate {
+    func didSelectFilter(_ filter: FilterType) {
+        currentFilter = filter
+        
+        switch filter {
+        case .allTrackers, .todayTrackers:
+            isFilterApplied = true
+        case .completed, .notCompleted:
+            isFilterApplied = true
+        }
+        
+        reloadData()
+    }
+    
+    private func updatePlaceholderForFilter() {
+        if visibleCategories.isEmpty {
+            placeholderImageView.image = UIImage(resource: .notFound)
+            placeholderLabel.text = "Ничего не найдено"
+            placeholderStack.isHidden = false
+            collectionView.isHidden = true
         }
     }
 }
