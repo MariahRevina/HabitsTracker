@@ -17,20 +17,6 @@ final class TrackersViewController: UIViewController {
     private var currentFilter: FilterType = .allTrackers
     private var isFilterApplied: Bool = false
     
-    // MARK: - UI Colors (Динамические цвета для темной темы)
-    
-    private let backgroundColor: UIColor = {
-        UIColor { traits in
-            traits.userInterfaceStyle == .dark ? .yBlackDay : .white
-        }
-    }()
-    
-    private let textColor: UIColor = {
-        UIColor { traits in
-            traits.userInterfaceStyle == .dark ? .white : .black
-        }
-    }()
-    
     // MARK: - UI Elements
     private lazy var filterButton: UIButton = {
         let button = UIButton(type: .system)
@@ -47,7 +33,9 @@ final class TrackersViewController: UIViewController {
     private lazy var addButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(resource: .plus), for: .normal)
-        button.tintColor = .black
+        button.tintColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .white : UIColor( resource: .yBlackDay)
+        }
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(addTrackerTapped), for: .touchUpInside)
         return button
@@ -57,7 +45,9 @@ final class TrackersViewController: UIViewController {
         let label = UILabel()
         label.text = NSLocalizedString("trackers_title", comment: "Main screen title")
         label.font = UIFont.systemFont(ofSize: 34, weight: .bold)
-        label.textColor = .black
+        label.textColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .white : UIColor( resource: .yBlackDay)
+        }
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -74,8 +64,6 @@ final class TrackersViewController: UIViewController {
             self?.datePickerValueChanged()
         }, for: .valueChanged)
         
-        picker.overrideUserInterfaceStyle = .unspecified
-        
         return picker
     }()
     
@@ -88,6 +76,17 @@ final class TrackersViewController: UIViewController {
         searchBar.layer.cornerRadius = 8
         searchBar.clipsToBounds = true
         searchBar.delegate = self
+        searchBar.searchTextField.textColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .white : UIColor(resource: .yBlackDay)
+        }
+        searchBar.searchTextField.backgroundColor = UIColor { traits in
+            if traits.userInterfaceStyle == .dark {
+                // пока так
+                return UIColor(white: 1.0, alpha: 0.12)
+            } else {
+                return UIColor(red: 118/255, green: 118/255, blue: 128/255, alpha: 0.12)
+            }
+        }
         
         return searchBar
     }()
@@ -116,7 +115,8 @@ final class TrackersViewController: UIViewController {
         let label = UILabel()
         label.text = "Что будем отслеживать?"
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .black
+        label.textColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .white : UIColor(resource: .yBlackDay)}
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -159,11 +159,12 @@ final class TrackersViewController: UIViewController {
             }
         }
     }
-    
     // MARK: - Private Methods
     
     private func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? UIColor(resource: .yBlackDay) : .white
+        }
         
         view.addSubview(addButton)
         view.addSubview(trackersLabel)

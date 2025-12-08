@@ -31,6 +31,9 @@ final class CreateHabitScreen: UIViewController {
         label.text = ""
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textAlignment = .center
+        label.textColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .white : .yBlackDay
+        }
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -40,6 +43,9 @@ final class CreateHabitScreen: UIViewController {
         label.text = "0 дней"
         label.font = UIFont.systemFont(ofSize: 32, weight: .bold)
         label.textAlignment = .center
+        label.textColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .white : .yBlackDay
+        }
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isHidden = true
         return label
@@ -55,7 +61,8 @@ final class CreateHabitScreen: UIViewController {
         let textField = UITextField()
         textField.placeholder = "Введите название трекера"
         textField.layer.cornerRadius = 16
-        textField.backgroundColor = UIColor(red: 230/255, green: 232/255, blue: 235/255, alpha: 0.3)
+        textField.backgroundColor = UIColor {traits in
+            traits.userInterfaceStyle == .dark ? UIColor(resource: .textfieldBackground) : .yLightGray}
         textField.translatesAutoresizingMaskIntoConstraints = false
         
         let leftPaddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
@@ -89,7 +96,10 @@ final class CreateHabitScreen: UIViewController {
         let tableView = UITableView()
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.layer.cornerRadius = 16
-        tableView.backgroundColor = UIColor(red: 230/255, green: 232/255, blue: 235/255, alpha: 0.3)
+        tableView.backgroundColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? UIColor(resource: .textfieldBackground) : .yLightGray
+        }
+        tableView.separatorColor = .yGray
         tableView.isScrollEnabled = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
@@ -118,6 +128,9 @@ final class CreateHabitScreen: UIViewController {
         button.layer.cornerRadius = 16
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.yRed.cgColor
+        button.backgroundColor  = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? UIColor(resource: .yBlackDay) : .white
+        }
         button.translatesAutoresizingMaskIntoConstraints = false
         
         button.addAction(UIAction { [weak self] _ in
@@ -171,7 +184,8 @@ final class CreateHabitScreen: UIViewController {
     
     private func setupUI() {
         
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor {traits in
+            traits.userInterfaceStyle == .dark ? UIColor(resource: .yBlackDay) : .white}
         
         textField.delegate = self
         
@@ -454,7 +468,6 @@ final class CreateHabitScreen: UIViewController {
         } else {
             UIView.animate(withDuration: 0.3) {
                 self.errorLabel.alpha = 0
-                self.textField.backgroundColor = UIColor(red: 230/255, green: 232/255, blue: 235/255, alpha: 0.3)
             }
         }
     }
@@ -533,7 +546,8 @@ extension CreateHabitScreen: UITableViewDataSource {
         
         cell.textLabel?.text = options[indexPath.row]
         cell.textLabel?.font = UIFont.systemFont(ofSize: 17)
-        cell.textLabel?.textColor = .yBlackDay
+        cell.textLabel?.textColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .white : UIColor(resource: .yBlackDay)}
         
         if indexPath.row == 0, let category = selectedCategory {
             cell.detailTextLabel?.text = category

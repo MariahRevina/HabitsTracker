@@ -28,7 +28,9 @@ final class MainTabBarViewController: UITabBarController {
     private func setupTabBarAppearance() {
         tabBar.tintColor = .systemBlue
         tabBar.unselectedItemTintColor = .gray
-        tabBar.backgroundColor = .white
+        view.backgroundColor = UIColor { traits in
+                    traits.userInterfaceStyle == .dark ? UIColor(resource: .yBlackDay) : .white
+                }
         tabBar.backgroundImage = UIImage()
         tabBar.shadowImage = UIImage()
         tabBar.isTranslucent = false

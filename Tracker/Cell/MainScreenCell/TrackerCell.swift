@@ -34,7 +34,8 @@ final class TrackerCell: UICollectionViewCell {
     private lazy var daysLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .black
+        label.textColor = UIColor {traits in
+            traits.userInterfaceStyle == .dark ? .white : UIColor(resource: .yBlackDay)}
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()

@@ -17,7 +17,9 @@ final class AddEditCategoryViewController: UIViewController {
         let textField = UITextField()
         textField.placeholder = "Введите название категории"
         textField.layer.cornerRadius = 17
-        textField.backgroundColor = UIColor(resource: .yLightGray)
+        textField.backgroundColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .textfieldBackground : UIColor(resource: .yLightGray)
+        }
         textField.translatesAutoresizingMaskIntoConstraints = false
         
         let leftPaddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
@@ -70,7 +72,8 @@ final class AddEditCategoryViewController: UIViewController {
     
     // MARK: - Setup
     private func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor {traits in
+            traits.userInterfaceStyle == .dark ? .yBlackDay : .white}
         view.addSubview(textField)
         view.addSubview(doneButton)
         
@@ -113,7 +116,10 @@ final class AddEditCategoryViewController: UIViewController {
         let isEmpty = text.isEmpty
         
         doneButton.isEnabled = !isEmpty
-        doneButton.backgroundColor = isEmpty ? .yGray : .yBlackDay
+        doneButton.backgroundColor = isEmpty ? .yGray : UIColor {traits in
+            traits.userInterfaceStyle == .dark ? .white : .yBlackDay}
+        doneButton.setTitleColor(isEmpty ? .white : UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .yBlackDay : .white}, for: .normal)   
     }
     
     // MARK: - Actions

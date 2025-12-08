@@ -13,7 +13,7 @@ final class CategoryViewController: UIViewController {
         let tableView = UITableView()
         tableView.register(CategoryCell.self, forCellReuseIdentifier: CategoryCell.identifier)
         tableView.layer.cornerRadius = 16
-        tableView.separatorStyle = .none
+        tableView.separatorColor = .yGray
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
@@ -39,7 +39,8 @@ final class CategoryViewController: UIViewController {
         let label = UILabel()
         label.text = "Привычки можно\nобъединить по смыслу"
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .yBlackDay
+        label.textColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .white : UIColor(resource: .yBlackDay)}
         label.textAlignment = .center
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -49,8 +50,12 @@ final class CategoryViewController: UIViewController {
     private lazy var addCategoryButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Добавить категорию", for: .normal)
-        button.backgroundColor = .yBlackDay
-        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .white : UIColor(resource: .yBlackDay)
+        }
+        button.setTitleColor(UIColor { traits in
+            traits.userInterfaceStyle == .dark ? UIColor(resource: .yBlackDay) : .white
+        }, for: .normal)
         button.layer.cornerRadius = 16
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -94,7 +99,9 @@ final class CategoryViewController: UIViewController {
     
     // MARK: - Setup
     private func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor {traits in
+            traits.userInterfaceStyle == .dark ? UIColor(resource: .yBlackDay) : .white
+        }
         
         placeholderStack.addArrangedSubview(placeholderImageView)
         placeholderStack.addArrangedSubview(placeholderLabel)
@@ -259,7 +266,11 @@ extension CategoryViewController: UITableViewDataSource {
         let isLastCell = indexPath.row == viewModel.numberOfCategories() - 1
         
         cell.configure(with: categoryTitle, isSelected: isSelected, isLastCell: isLastCell)
-        
+        if indexPath.row == 0 {
+            tableView.separatorStyle = .none 
+        } else {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: .greatestFiniteMagnitude)
+        }
         return cell
     }
 }

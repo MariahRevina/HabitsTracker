@@ -13,7 +13,9 @@ final class SheduleScreen: UIViewController {
         let tableView = UITableView()
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "weekdayCell")
         tableView.layer.cornerRadius = 16
-        tableView.backgroundColor = UIColor(red: 230/255, green: 232/255, blue: 235/255, alpha: 0.3)
+        tableView.backgroundColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .textfieldBackground : .yLightGray}
+        tableView.separatorColor = .yGray
         tableView.isScrollEnabled = true
         tableView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -25,9 +27,11 @@ final class SheduleScreen: UIViewController {
     private lazy var readyButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Готово", for: .normal)
-        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(UIColor {traits in
+            traits.userInterfaceStyle == .dark ? .yBlackDay : .white}, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        button.backgroundColor = .yBlackDay
+        button.backgroundColor = UIColor {traits in
+            traits.userInterfaceStyle == .dark ? .white : .yBlackDay}
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
         
@@ -47,7 +51,8 @@ final class SheduleScreen: UIViewController {
     
     private func setupUI() {
         
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor {traits in
+            traits.userInterfaceStyle == .dark ? .yBlackDay : .white}
         
         view.addSubview(weekdayTableView)
         view.addSubview(readyButton)
