@@ -16,6 +16,7 @@ final class TrackersViewController: UIViewController {
     
     private var currentFilter: FilterType = .allTrackers
     private var isFilterApplied: Bool = false
+    private var searchText: String = ""
     
     // MARK: - UI Elements
     private lazy var filterButton: UIButton = {
@@ -79,14 +80,7 @@ final class TrackersViewController: UIViewController {
         searchBar.searchTextField.textColor = UIColor { traits in
             traits.userInterfaceStyle == .dark ? .white : UIColor(resource: .yBlackDay)
         }
-        searchBar.searchTextField.backgroundColor = UIColor { traits in
-            if traits.userInterfaceStyle == .dark {
-                // пока так
-                return UIColor(white: 1.0, alpha: 0.12)
-            } else {
-                return UIColor(red: 118/255, green: 118/255, blue: 128/255, alpha: 0.12)
-            }
-        }
+        searchBar.searchTextField.backgroundColor = .search
         
         return searchBar
     }()
@@ -136,6 +130,7 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        setupGestures()
         
         trackerStore?.delegate = self
         
@@ -155,6 +150,8 @@ final class TrackersViewController: UIViewController {
             
             if selectedDate != today {
                 datePicker.date = Date()
+                searchText = ""
+                searchBar.text = ""
                 reloadData()
             }
         }
@@ -222,6 +219,16 @@ final class TrackersViewController: UIViewController {
         ])
     }
     
+    private func setupGestures() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
     @objc private func addTrackerTapped() {
         let createHabitVC = CreateHabitScreen(mode: .create)
         createHabitVC.delegate = self
@@ -245,6 +252,9 @@ final class TrackersViewController: UIViewController {
     }
     
     private func datePickerValueChanged() {
+        searchText = ""
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
         
         reloadData()
         updateCompleteButtonsState()
@@ -273,6 +283,10 @@ final class TrackersViewController: UIViewController {
         
         var allTrackers = trackerStore.fetchTrackers(for: selectedDate)
         
+        if !searchText.isEmpty {
+                allTrackers = filterTrackersBySearch(allTrackers, searchText: searchText)
+            }
+        
         switch currentFilter {
         case .allTrackers:
             visibleCategories = allTrackers
@@ -283,22 +297,47 @@ final class TrackersViewController: UIViewController {
                 datePicker.date = Date()
             }
             let today = Date()
-            visibleCategories = trackerStore.fetchTrackers(for: today)
+            var todayTrackers = trackerStore.fetchTrackers(for: today)
+                    if !searchText.isEmpty {
+                        todayTrackers = filterTrackersBySearch(todayTrackers, searchText: searchText)
+                    }
+                    visibleCategories = todayTrackers
             
         case .completed:
             
             filterCompletedTrackers(from: &allTrackers)
+            visibleCategories = allTrackers.filter { !$0.trackers.isEmpty }
             
         case .notCompleted:
-            
             filterNotCompletedTrackers(from: &allTrackers)
+            visibleCategories = allTrackers.filter { !$0.trackers.isEmpty }
         }
         
-        
         updateFilterButtonVisibility()
-        
         collectionView.reloadData()
         updatePlaceholderVisibility()
+    }
+    
+    private func filterTrackersBySearch(_ categories: [TrackerCategory], searchText: String) -> [TrackerCategory] {
+        let searchTextLowercased = searchText.lowercased()
+        
+        var filteredCategories: [TrackerCategory] = []
+        
+        for category in categories {
+            let filteredTrackers = category.trackers.filter { tracker in
+                tracker.name.lowercased().contains(searchTextLowercased)
+            }
+            
+            if !filteredTrackers.isEmpty {
+                let filteredCategory = TrackerCategory(
+                    title: category.title,
+                    trackers: filteredTrackers
+                )
+                filteredCategories.append(filteredCategory)
+            }
+        }
+        
+        return filteredCategories
     }
     
     private func filterCompletedTrackers(from categories: inout [TrackerCategory]) {
@@ -341,7 +380,10 @@ final class TrackersViewController: UIViewController {
             placeholderStack.isHidden = true
             collectionView.isHidden = false
         } else {
-            if currentFilter != .allTrackers && currentFilter != .todayTrackers {
+            if !searchText.isEmpty {
+                placeholderImageView.image = UIImage(resource: .notFound)
+                placeholderLabel.text = "Ничего не найдено"
+            } else if currentFilter != .allTrackers && currentFilter != .todayTrackers {
                 placeholderImageView.image = UIImage(resource: .notFound)
                 placeholderLabel.text = "Ничего не найдено"
             } else {
@@ -592,7 +634,8 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 // MARK: - UISearchBarDelegate
 extension TrackersViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        // Реализация поиска будет добавлена позже
+        self.searchText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+                reloadData()
     }
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
@@ -601,6 +644,7 @@ extension TrackersViewController: UISearchBarDelegate {
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.text = ""
+        searchText = ""
         searchBar.resignFirstResponder()
         searchBar.setShowsCancelButton(false, animated: true)
         reloadData()
@@ -613,6 +657,9 @@ extension TrackersViewController: UISearchBarDelegate {
 
 extension TrackersViewController: TrackerStoreDelegate {
     func didUpdateTrackers() {
+        searchText = ""
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
         reloadData()
     }
 }
@@ -623,6 +670,8 @@ extension TrackersViewController: CreateTrackerViewControllerDelegate {
         
         do {
             try trackerStore.createTracker(tracker, categoryTitle: categoryTitle)
+            searchText = ""
+            searchBar.text = ""
             dismiss(animated: true)
         } catch {
             let alert = UIAlertController(
@@ -640,6 +689,8 @@ extension TrackersViewController: CreateTrackerViewControllerDelegate {
         
         do {
             try trackerStore.updateTracker(tracker, categoryTitle: categoryTitle)
+            searchText = ""
+            searchBar.text = ""
             dismiss(animated: true)
         } catch {
             LoggerService.shared.error("Failed to update tracker: \(error)")
@@ -664,7 +715,9 @@ extension TrackersViewController: FilterViewControllerDelegate {
         case .completed, .notCompleted:
             isFilterApplied = true
         }
-        
+        searchText = ""
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
         reloadData()
     }
     
