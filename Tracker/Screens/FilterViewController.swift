@@ -28,7 +28,11 @@ final class FilterViewController: UIViewController {
         tableView.layer.cornerRadius = 16
         tableView.clipsToBounds = true
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        tableView.separatorColor = .yGray
+        tableView.tableFooterView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0.1))
         tableView.isScrollEnabled = false
+        tableView.rowHeight = 75
+        tableView.estimatedRowHeight = 75
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
@@ -50,7 +54,8 @@ final class FilterViewController: UIViewController {
     }
     
     private func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .yBlackDay : .white}
         view.addSubview(titleLabel)
         view.addSubview(tableView)
     }
@@ -64,7 +69,7 @@ final class FilterViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            tableView.heightAnchor.constraint(equalToConstant: 300)
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
         ])
     }
 }
@@ -80,7 +85,8 @@ extension FilterViewController: UITableViewDataSource {
         let filter = FilterType.allCases[indexPath.row]
         cell.textLabel?.text = filter.title
         cell.textLabel?.font = UIFont.systemFont(ofSize: 17)
-        cell.backgroundColor = .yLightGray
+        cell.backgroundColor = UIColor {traits in
+            traits.userInterfaceStyle == .dark ? .textfieldBackground : .yLightGray}
         cell.selectionStyle = .none
         
         switch filter {
@@ -101,14 +107,25 @@ extension FilterViewController: UITableViewDataSource {
                 cell.accessoryType = .none
             }
         }
+        let numberOfRows = tableView.numberOfRows(inSection: indexPath.section)
+        if indexPath.row == numberOfRows - 1 {
+            cell.layer.cornerRadius = 16
+            cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         
+            cell.separatorInset = UIEdgeInsets(
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        right: .greatestFiniteMagnitude)
+        } else {
+            cell.layer.cornerRadius = 0
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        }
+    
         return cell
     }
 }
 extension FilterViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 75
-    }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedFilter = FilterType.allCases[indexPath.row]

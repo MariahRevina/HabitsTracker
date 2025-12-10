@@ -244,7 +244,7 @@ final class TrackersViewController: UIViewController {
         filterVC.modalPresentationStyle = .pageSheet
         
         if let sheet = filterVC.sheetPresentationController {
-            sheet.detents = [.medium()]
+            sheet.detents = [.large()]
             sheet.prefersGrabberVisible = true
         }
         
