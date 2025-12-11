@@ -202,7 +202,7 @@ final class TrackersViewController: UIViewController {
             collectionView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 24),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
             // Placeholder
             placeholderStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -224,7 +224,7 @@ final class TrackersViewController: UIViewController {
         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
     }
-
+    
     @objc private func dismissKeyboard() {
         view.endEditing(true)
     }
@@ -284,8 +284,8 @@ final class TrackersViewController: UIViewController {
         var allTrackers = trackerStore.fetchTrackers(for: selectedDate)
         
         if !searchText.isEmpty {
-                allTrackers = filterTrackersBySearch(allTrackers, searchText: searchText)
-            }
+            allTrackers = filterTrackersBySearch(allTrackers, searchText: searchText)
+        }
         
         switch currentFilter {
         case .allTrackers:
@@ -298,10 +298,10 @@ final class TrackersViewController: UIViewController {
             }
             let today = Date()
             var todayTrackers = trackerStore.fetchTrackers(for: today)
-                    if !searchText.isEmpty {
-                        todayTrackers = filterTrackersBySearch(todayTrackers, searchText: searchText)
-                    }
-                    visibleCategories = todayTrackers
+            if !searchText.isEmpty {
+                todayTrackers = filterTrackersBySearch(todayTrackers, searchText: searchText)
+            }
+            visibleCategories = todayTrackers
             
         case .completed:
             
@@ -635,7 +635,7 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 extension TrackersViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         self.searchText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-                reloadData()
+        reloadData()
     }
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
