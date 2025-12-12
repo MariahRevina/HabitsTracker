@@ -19,3 +19,8 @@
 "cancel_button" = "Отменить";
 "delete_confirmation_title" = "Уверены что хотите удалить трекер?";
 "placeholder_text" = "Что будем отслеживать?";
+
+/* Statistics */
+"statistic_screen" = "Статистика";
+"nothing_to_analise" = "Анализировать пока нечего";
+"trackers_completed" = "Трекеров завершено";
