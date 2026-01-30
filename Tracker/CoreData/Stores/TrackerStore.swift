@@ -63,7 +63,31 @@ final class TrackerStore: NSObject {
         DataBaseStore.shared.saveContext()
     }
     
-    
+    func updateTracker(_ tracker: Tracker, categoryTitle: String) throws {
+        guard context.persistentStoreCoordinator != nil else {
+            throw NSError(domain: "TrackerStore", code: -1, userInfo: [NSLocalizedDescriptionKey: "Контекст Core Data не готов"])
+        }
+        
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
+        
+        let results = try context.fetch(fetchRequest)
+        guard let trackerCoreData = results.first else {
+            throw NSError(domain: "TrackerStore", code: -2, userInfo: [NSLocalizedDescriptionKey: "Трекер не найден"])
+        }
+        
+        trackerCoreData.name = tracker.name
+        trackerCoreData.color = UIColorMarshalling.hexString(from: tracker.color)
+        trackerCoreData.emoji = tracker.emoji
+        
+        let scheduleData = try? NSKeyedArchiver.archivedData(withRootObject: tracker.schedule.map { $0.rawValue }, requiringSecureCoding: false)
+        trackerCoreData.schedule = scheduleData
+        
+        let category = try trackerCategoryStore.fetchOrCreateCategory(with: categoryTitle)
+        trackerCoreData.category = category
+        
+        DataBaseStore.shared.saveContext()
+    }
     func fetchTrackers() -> [Tracker] {
         guard let objects = fetchedResultsController.fetchedObjects else {
             return []
@@ -119,7 +143,7 @@ final class TrackerStore: NSObject {
                     categories[categoryTitle] = []
                 }
                 categories[categoryTitle]?.append(tracker)
-            } 
+            }
         }
         
         let result = categories.map { TrackerCategory(title: $0.key, trackers: $0.value) }

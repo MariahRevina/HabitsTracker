@@ -1,4 +1,5 @@
 import UIKit
+import AppMetricaCore
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -19,9 +20,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }()
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        if let configuration = AppMetricaConfiguration(apiKey: "427a86f5-f835-4bdc-adf0-4ea77d6e20b2") {
+            AppMetrica.activate(with: configuration)
+        }
         
         window = UIWindow(frame: UIScreen.main.bounds)
-        window?.backgroundColor = .white
+        window?.backgroundColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark ? UIColor(resource: .yBlackDay) : .white
+        }
         
         if UsDefSettings.shared.onboardingShown {
             showMainScreen()

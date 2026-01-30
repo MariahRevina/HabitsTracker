@@ -1,0 +1,26 @@
+/* Tab Bar */
+"trackers_tab" = "Трекеры";
+"statistics_tab" = "Статистика";
+
+/* Main Screen */
+"trackers_title" = "Трекеры";
+"search_placeholder" = "Поиск";
+"placeholder_text" = "Что будем отслеживать?";
+
+/* Filters */
+"filters_button" = "Фильтры";
+
+/* Days count */
+"days_count" = "%d дней";
+
+/* Action Sheet */
+"edit_action" = "Редактировать";
+"delete_action" = "Удалить";
+"cancel_button" = "Отменить";
+"delete_confirmation_title" = "Уверены что хотите удалить трекер?";
+"placeholder_text" = "Что будем отслеживать?";
+
+/* Statistics */
+"statistic_screen" = "Статистика";
+"nothing_to_analise" = "Анализировать пока нечего";
+"trackers_completed" = "Трекеров завершено";

@@ -34,7 +34,8 @@ final class TrackerCell: UICollectionViewCell {
     private lazy var daysLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .black
+        label.textColor = UIColor {traits in
+            traits.userInterfaceStyle == .dark ? .white : UIColor(resource: .yBlackDay)}
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -45,7 +46,7 @@ final class TrackerCell: UICollectionViewCell {
         button.translatesAutoresizingMaskIntoConstraints = false
         
         button.addAction(UIAction { [weak self] _ in
-
+            
             self?.onCompleteButtonTapped?()
         }, for: .touchUpInside)
         
@@ -135,15 +136,7 @@ final class TrackerCell: UICollectionViewCell {
     }
     
     private func formatDays(count: Int) -> String {
-        let remainder10 = count % 10
-        let remainder100 = count % 100
-        
-        if remainder10 == 1 && remainder100 != 11 {
-            return "\(count) день"
-        } else if remainder10 >= 2 && remainder10 <= 4 && (remainder100 < 10 || remainder100 >= 20) {
-            return "\(count) дня"
-        } else {
-            return "\(count) дней"
-        }
+        let format = NSLocalizedString("days_count", comment: "Number of days format")
+        return String.localizedStringWithFormat(format, count)
     }
 }

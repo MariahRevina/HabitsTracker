@@ -1,0 +1,26 @@
+/* Tab Bar */
+"trackers_tab" = "Trackers";
+"statistics_tab" = "Statistics";
+
+/* Main Screen */
+"trackers_title" = "Trackers";
+"search_placeholder" = "Search";
+"placeholder_text" = "What will we track?";
+
+/* Filters */
+"filters_button" = "Filters";
+
+/* Days count */
+"days_count" = "%d days";
+
+/* Action Sheet */
+"edit_action" = "Edit";
+"delete_action" = "Delete";
+"cancel_button" = "Отменить";
+"delete_confirmation_title" = "Are you sure you want to delete the tracker?";
+"placeholder_text" = "What will we track?";
+
+/* Statistics */
+"statistic_screen" = "Statistics";
+"nothing_to_analise" = "Nothing to analise yet";
+"trackers_completed" = "Trackers completed";
